@@ -1,0 +1,894 @@
+
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AASOM Co-Innovation Assistant — MVP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+:root {
+  --aws-orange:#FF9900;
+  --neon-magenta:#d946ef;
+  --neon-blue:#3b82f6;
+  --neon-purple:#8b5cf6;
+  --bg-dark:#050509;
+  --glass-bg:rgba(25,25,35,0.35);
+  --glass-border:rgba(255,255,255,0.08);
+  --glass-blur:blur(32px);
+  --glass-shadow:0 16px 40px rgba(0,0,0,0.3), inset 0 0 16px rgba(255,255,255,0.02);
+  --text-primary:#ffffff;
+  --text-secondary:#9ca3af;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg-dark);color:var(--text-primary);display:flex;height:100vh;overflow:hidden;padding:24px;gap:24px;position:relative}
+body::before,body::after{content:'';position:absolute;border-radius:50%;z-index:-1;filter:blur(100px)}
+body::before{top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(139,92,246,0.4),transparent 60%)}
+body::after{bottom:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(59,130,246,0.25),rgba(217,70,239,0.15),transparent 60%)}
+.ambient-glow-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40vw;height:40vw;background:radial-gradient(circle,rgba(255,153,0,0.08),transparent 70%);z-index:-1;filter:blur(80px)}
+.sidebar,.main{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:36px;box-shadow:var(--glass-shadow);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sidebar{width:296px;z-index:10}
+.sidebar-header{padding:32px 24px 16px}
+.sidebar-header .wordmark{display:flex;align-items:center;gap:10px}
+.sidebar-header .logo{display:flex;align-items:center;justify-content:center;color:var(--aws-orange)}
+.sidebar-header h2{font-size:15px;font-weight:600;background:linear-gradient(90deg,#fff,#9ca3af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:0.2px}
+.tag{display:inline-block;background:linear-gradient(90deg,rgba(217,70,239,0.15),rgba(139,92,246,0.15));color:#e879f9;border:1px solid rgba(217,70,239,0.3);font-size:10px;font-weight:700;padding:4px 10px;border-radius:12px;margin-top:12px;letter-spacing:1px}
+.gov-chip{display:flex;align-items:center;gap:8px;margin:14px 0 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:var(--aws-orange);border:1px solid rgba(255,153,0,0.35);background:rgba(255,153,0,0.08);padding:7px 10px;border-radius:999px}
+.gov-chip i{font-size:11px}
+.sidebar-section{padding:18px 20px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#6b7280}
+.nav-menu{padding:0 16px}
+.nav-item{padding:13px 16px;display:flex;align-items:flex-start;gap:14px;color:var(--text-secondary);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);border-radius:18px;margin-bottom:6px;line-height:1.35}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,0.04)}
+.nav-item.active{color:#fff;background:linear-gradient(90deg,rgba(255,153,0,0.12),transparent);box-shadow:inset 2px 0 0 var(--aws-orange)}
+.nav-item.active .agent-num{color:var(--aws-orange)}
+.nav-item .agent-box{display:flex;flex-direction:column;flex:1;min-width:0}
+.nav-item .agent-num{font-size:9px;font-weight:700;letter-spacing:1.3px;color:#6b7280;margin-bottom:2px}
+.nav-item .agent-name{font-size:13px;font-weight:600;color:inherit}
+.nav-item .agent-desc{font-size:10px;color:#6b7280;margin-top:2px;line-height:1.4}
+.nav-item i.icon{font-size:14px;width:18px;text-align:center;margin-top:2px}
+.sidebar-footer{margin-top:auto;padding:18px 20px;border-top:1px solid var(--glass-border)}
+.sidebar-footer .meta{font-size:10px;color:#6b7280;line-height:1.5}
+.sidebar-footer .meta b{color:#9ca3af;text-transform:uppercase;letter-spacing:1px;font-size:9px;display:block;margin-bottom:4px}
+.main{flex:1;min-width:0}
+.topbar{padding:22px 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border)}
+.topbar h1{font-size:18px;font-weight:600}
+.greeting{font-size:12px;color:var(--text-secondary);margin-bottom:4px;font-weight:500}
+.topbar-actions{display:flex;align-items:center;gap:14px;color:var(--text-secondary)}
+.icon-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;color:var(--text-secondary)}
+.icon-btn:hover{background:rgba(255,255,255,0.1);color:#fff;transform:translateY(-2px)}
+.profile-pic{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--neon-blue),var(--neon-magenta));color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,0.2)}
+/* Theory banner */
+.theory-banner{padding:16px 32px;background:linear-gradient(90deg,rgba(139,92,246,0.08),rgba(59,130,246,0.08));border-bottom:1px solid var(--glass-border);flex-shrink:0}
+.theory-banner h4{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#a78bfa;font-weight:700;margin-bottom:8px}
+.theory-banner p{font-size:12px;color:var(--text-secondary);line-height:1.6;max-width:860px}
+.dc-pills{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.dc-pill{font-size:10.5px;padding:5px 13px;border-radius:20px;font-weight:600;border:1px solid rgba(255,255,255,0.1);transition:all 0.4s ease;cursor:default;white-space:nowrap}
+.dc-pill.sensing{background:rgba(16,185,129,0.1);color:#6ee7b7;border-color:rgba(16,185,129,0.3)}
+.dc-pill.seizing{background:rgba(59,130,246,0.1);color:#93c5fd;border-color:rgba(59,130,246,0.3)}
+.dc-pill.transforming{background:rgba(255,153,0,0.1);color:#fbbf24;border-color:rgba(255,153,0,0.3)}
+.dc-pill.active{box-shadow:0 0 16px currentColor;transform:scale(1.06)}
+/* Dashboard */
+.dashboard{flex:1;display:flex;overflow:hidden;min-height:0}
+.signals-pane{width:400px;border-right:1px solid var(--glass-border);display:flex;flex-direction:column;min-height:0}
+.pane-header{padding:22px 28px 14px;display:flex;justify-content:space-between;align-items:center}
+.pane-header h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-secondary)}
+.pane-header .count{font-size:11px;color:#6b7280}
+.custom-signal-box{padding:0 28px 18px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--glass-border);padding-bottom:20px}
+#signal-input{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px;color:#fff;font-family:'Inter',sans-serif;font-size:12.5px;resize:none;height:74px;transition:border 0.3s}
+#signal-input:focus{outline:none;border-color:var(--neon-blue);box-shadow:0 0 16px rgba(59,130,246,0.2)}
+.signal-actions{display:flex;gap:10px;justify-content:space-between;align-items:center}
+.mic-btn-container{display:flex;align-items:center;gap:8px}
+.mic-btn{background:rgba(255,255,255,0.05);color:var(--text-secondary);border:1px solid var(--glass-border);border-radius:50%;width:34px;height:34px;cursor:pointer;transition:all 0.2s}
+.mic-btn:hover{background:rgba(255,255,255,0.1);color:#fff}
+.mic-btn.recording{background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.5);animation:pulseRecord 1.5s infinite}
+@keyframes pulseRecord{0%{box-shadow:0 0 0 0 rgba(239,68,68,0.4)}70%{box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.mic-status{font-size:10.5px;color:var(--text-secondary);opacity:0;transition:opacity 0.3s}
+.mic-status.recording{opacity:1;color:#ef4444;font-weight:500}
+.add-btn{background:rgba(255,153,0,0.15);color:#fbbf24;border:1px solid rgba(255,153,0,0.35);border-radius:20px;padding:8px 14px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.add-btn:hover{background:rgba(255,153,0,0.25);border-color:rgba(255,153,0,0.55);color:#fff}
+.signal-list{flex:1;overflow-y:auto;padding:18px 28px 24px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.signal-list::-webkit-scrollbar{width:6px}
+.signal-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
+.scenario-card{background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);border-radius:18px;padding:18px;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden}
+.scenario-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,153,0,0.1),rgba(217,70,239,0.08));opacity:0;transition:opacity 0.3s}
+.scenario-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,0.2);box-shadow:0 12px 30px rgba(0,0,0,0.3)}
+.scenario-card.selected{background:rgba(255,255,255,0.03);border-color:var(--aws-orange);box-shadow:0 8px 30px rgba(255,153,0,0.15),inset 0 0 0 1px var(--aws-orange)}
+.scenario-card.selected::before{opacity:1}
+.card-content{position:relative;z-index:2}
+.card-header{display:flex;justify-content:space-between;margin-bottom:10px;align-items:center}
+.industry{font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.time{font-size:10px;color:var(--text-secondary)}
+.scenario-card h4{font-size:14px;margin-bottom:6px;color:#fff;line-height:1.4;font-weight:600}
+.scenario-card p{font-size:12px;color:#9ca3af;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.signals-tags{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+.stag{font-size:9px;font-weight:600;padding:3px 9px;border-radius:10px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);color:#93c5fd;text-transform:uppercase;letter-spacing:0.5px}
+.stag.agent{background:rgba(255,153,0,0.1);border-color:rgba(255,153,0,0.3);color:#fbbf24}
+/* Workspace */
+.workspace{flex:1;display:flex;flex-direction:column;position:relative;overflow-y:auto;min-height:0}
+.workspace::-webkit-scrollbar{width:8px}
+.workspace::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;min-height:380px}
+.orb-container{width:220px;height:220px;position:relative;margin-bottom:28px;display:flex;align-items:center;justify-content:center}
+.orb{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffb040,var(--aws-orange),#8b5cf6 75%,#1e1b4b);box-shadow:0 0 60px rgba(255,153,0,0.5),inset -10px -10px 40px rgba(0,0,0,0.5),inset 10px 10px 20px rgba(255,255,255,0.35);animation:floatOrb 6s ease-in-out infinite,rotateOrb 10s linear infinite;position:relative;z-index:2}
+.orb-ring{position:absolute;width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,153,0,0.3);box-shadow:0 0 20px rgba(255,153,0,0.2);animation:pulseRing 3s ease-out infinite}
+.orb-ring:nth-child(2){animation-delay:1.5s;width:175px;height:175px;border-color:rgba(217,70,239,0.3)}
+@keyframes floatOrb{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes rotateOrb{to{transform:rotate(360deg)}}
+@keyframes pulseRing{0%{transform:scale(0.8);opacity:1}100%{transform:scale(1.4);opacity:0}}
+.empty-state h3{font-size:21px;color:#fff;margin-bottom:12px;font-weight:500;text-align:center;line-height:1.4}
+.empty-state p{font-size:13px;color:var(--text-secondary);text-align:center;max-width:360px;line-height:1.6}
+.empty-state .hint{margin-top:16px;font-size:11px;color:#6b7280;letter-spacing:0.4px}
+/* Action banner */
+.action-banner{padding:26px 36px;border-bottom:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;gap:20px;background:linear-gradient(90deg,rgba(255,153,0,0.06) 0%,transparent 100%);flex-shrink:0;flex-wrap:wrap}
+.action-info h2{font-size:18px;color:#fff;margin-bottom:6px;font-weight:600}
+.action-info p{font-size:13px;color:var(--text-secondary);max-width:560px;line-height:1.55}
+.btn-generate{background:linear-gradient(135deg,var(--aws-orange),var(--neon-magenta));color:#fff;border:none;padding:13px 28px;font-size:13.5px;font-weight:600;border-radius:30px;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(255,153,0,0.3);white-space:nowrap}
+.btn-generate:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,153,0,0.4);filter:brightness(1.1)}
+/* Processing state */
+.ai-processing{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;min-height:380px}
+.processing-text{font-size:15px;color:#fff;font-weight:500;letter-spacing:0.3px;opacity:0;animation:fadeInText 0.6s forwards;text-align:center;max-width:480px;line-height:1.6}
+.processing-trace{font-size:11px;color:#6b7280;font-family:"SF Mono",Menlo,monospace;letter-spacing:0.3px;text-align:center;max-width:520px;line-height:1.9}
+.processing-trace span{display:block;opacity:0;animation:traceLine 0.5s forwards}
+.processing-trace span.done{color:#6ee7b7}
+.processing-trace span:nth-child(1){animation-delay:0.1s}
+.processing-trace span:nth-child(2){animation-delay:0.7s}
+.processing-trace span:nth-child(3){animation-delay:1.3s}
+.processing-trace span:nth-child(4){animation-delay:1.9s}
+.processing-trace span:nth-child(5){animation-delay:2.5s}
+@keyframes fadeInText{to{opacity:1}}
+@keyframes traceLine{to{opacity:1}}
+/* Output */
+.output-grid{padding:32px 36px 24px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.output-actions{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:12px}
+.output-actions h2{font-size:18px;font-weight:600;color:#fff}
+.output-actions .route{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1.1px;font-family:"SF Mono",Menlo,monospace}
+.output-actions .route b{color:var(--aws-orange)}
+.widget{background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);border-radius:22px;padding:26px 28px;box-shadow:inset 0 0 20px rgba(255,255,255,0.01);animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards;opacity:0;transform:translateY(20px)}
+@keyframes slideUp{to{opacity:1;transform:translateY(0)}}
+.widget.full{grid-column:1/-1}
+.widget-title{font-size:11px;text-transform:uppercase;letter-spacing:1.1px;font-weight:600;color:#a78bfa;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.widget-title .owner{margin-left:auto;font-size:9px;color:#6b7280;letter-spacing:0.8px;text-transform:none;font-family:"SF Mono",Menlo,monospace}
+.kpi-row{display:flex;gap:14px;flex-wrap:wrap}
+.kpi-item{flex:1 1 140px;min-width:130px;background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);padding:18px;border-radius:16px;display:flex;flex-direction:column;gap:6px}
+.kpi-val{font-size:28px;font-weight:700;color:#fff;background:linear-gradient(135deg,#fff,#9ca3af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.kpi-lbl{font-size:10.5px;color:var(--text-secondary);text-transform:uppercase;font-weight:600;letter-spacing:0.5px}
+.objective-text{font-size:14.5px;line-height:1.6;color:#e2e8f0;font-weight:400}
+.workstream-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.workstream-item{padding:13px 14px;border:1px solid var(--glass-border);border-radius:12px;background:rgba(255,255,255,0.02);display:flex;align-items:flex-start;gap:12px;font-size:12.5px;line-height:1.5;color:#e2e8f0}
+.workstream-num{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--aws-orange),var(--neon-magenta));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.team-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.team-chip{padding:7px 14px;border-radius:20px;background:rgba(255,255,255,0.05);font-size:12px;border:1px solid var(--glass-border);display:flex;align-items:center;gap:8px;color:#e2e8f0}
+.team-chip i{color:var(--aws-orange)}
+.risk-item{margin-bottom:18px;cursor:pointer;transition:background 0.2s;padding:12px;border-radius:12px;background:rgba(255,255,255,0.01)}
+.risk-item:hover{background:rgba(255,255,255,0.03)}
+.risk-item:last-child{margin-bottom:0}
+.risk-header{display:flex;justify-content:space-between;font-size:12.5px;font-weight:500;margin-bottom:10px;color:#fff}
+.risk-track{height:7px;background:rgba(0,0,0,0.4);border-radius:4px;overflow:hidden}
+.risk-fill{height:100%;border-radius:4px;transition:width 1s ease}
+.risk-fill.low{background:linear-gradient(90deg,#10b981,#34d399)}
+.risk-fill.med{background:linear-gradient(90deg,#FF9900,#fbbf24)}
+.risk-fill.high{background:linear-gradient(90deg,#ef4444,#f87171)}
+.risk-mitigation{margin-top:14px;padding:11px 14px;font-size:12px;background:rgba(255,153,0,0.08);border-left:3px solid var(--aws-orange);color:#e2e8f0;border-radius:0 8px 8px 0;line-height:1.55;display:none}
+.risk-mitigation.expanded{display:block;animation:slideDown 0.3s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.assurance-panel{margin-top:20px;padding:14px 16px;border-radius:12px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25)}
+.assurance-panel .title{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:#6ee7b7;font-weight:700;margin-bottom:6px}
+.assurance-panel ul{margin:0;padding-left:16px;font-size:11.5px;color:#d1fae5;line-height:1.6}
+.theory-annotation{background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.25);border-radius:20px;padding:22px 26px;font-size:13px;color:#c4b5fd;line-height:1.7}
+.theory-annotation strong{color:#e9d5ff;font-weight:700}
+.theory-annotation em{color:#a78bfa}
+.theory-annotation .theory-icon{display:inline-block;width:20px;height:20px;background:linear-gradient(135deg,var(--neon-purple),var(--neon-blue));border-radius:6px;text-align:center;line-height:20px;font-size:10px;margin-right:8px;vertical-align:middle}
+/* Copilot chat */
+.copilot-chat{background:rgba(0,0,0,0.2);border:1px solid var(--glass-border);border-radius:22px;padding:22px 24px}
+.copilot-chat .widget-title{margin-bottom:14px}
+.chat-chips{display:flex;gap:10px;margin-bottom:14px;overflow-x:auto;padding-bottom:6px;flex-wrap:wrap}
+.c-chip{font-size:11.5px;padding:8px 14px;border-radius:20px;background:rgba(255,255,255,0.05);color:var(--text-primary);cursor:pointer;border:1px solid var(--glass-border);white-space:nowrap;transition:all 0.2s}
+.c-chip:hover{background:rgba(255,153,0,0.1);border-color:rgba(255,153,0,0.4);color:#fff}
+.chat-input-box{display:flex;gap:14px;align-items:center}
+.chat-input-box input{flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);padding:13px 18px;border-radius:24px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;transition:border 0.3s}
+.chat-input-box input:focus{outline:none;border-color:var(--aws-orange);box-shadow:0 0 16px rgba(255,153,0,0.2)}
+.chat-input-box button{background:linear-gradient(135deg,var(--aws-orange),var(--neon-magenta));border:none;width:44px;height:44px;border-radius:50%;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s;flex-shrink:0}
+.chat-input-box button:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,153,0,0.4)}
+/* Substrate + governance */
+.substrate-strip{margin:0 36px 16px;padding:14px 20px;border:1px dashed var(--glass-border);border-radius:18px;background:rgba(0,0,0,0.15);display:flex;flex-direction:column;gap:8px}
+.substrate-strip .cap{font-size:9.5px;text-transform:uppercase;letter-spacing:1.2px;color:#6b7280;font-weight:700}
+.substrate-strip .cells{display:flex;gap:8px;flex-wrap:wrap}
+.substrate-strip .cell{flex:1 1 140px;font-size:11px;text-align:center;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,0.03);color:#9ca3af;border:1px solid rgba(255,255,255,0.06);transition:all 0.4s}
+.substrate-strip.active .cell{background:rgba(255,153,0,0.08);border-color:rgba(255,153,0,0.3);color:#fbbf24}
+.gov-strip{margin:0 36px 20px;padding:12px 20px;border-radius:18px;background:linear-gradient(90deg,rgba(255,153,0,0.12),rgba(217,70,239,0.05));border:1px solid rgba(255,153,0,0.25);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:11px}
+.gov-strip b{color:var(--aws-orange);text-transform:uppercase;letter-spacing:1.2px;font-size:10px;font-weight:700}
+.gov-strip .status{color:#9ca3af;font-size:10.5px;font-family:"SF Mono",Menlo,monospace}
+.gov-strip .status .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#6ee7b7;margin-right:6px;box-shadow:0 0 6px rgba(110,231,183,0.8);vertical-align:middle}
+/* Academic footer */
+.academic-footer{padding:16px 32px;border-top:1px solid var(--glass-border);text-align:center;font-size:10.5px;color:#6b7280;flex-shrink:0;background:rgba(0,0,0,0.2);line-height:1.6}
+.academic-footer strong{color:#9ca3af}
+.hidden{display:none !important}
+/* Responsive */
+@media (max-width:960px){
+  body{flex-direction:column;overflow-y:auto;height:auto;padding:12px;gap:12px}
+  .sidebar,.main{border-radius:24px}
+  .sidebar{width:100%;overflow:visible}
+  .sidebar-header{padding:20px 20px 12px}
+  .nav-menu{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 14px}
+  .nav-item{flex:1 1 45%;margin-bottom:0;padding:10px 12px}
+  .sidebar-section{padding:8px 20px 4px}
+  .sidebar-footer{display:none}
+  .dashboard{flex-direction:column;overflow:visible}
+  .signals-pane{width:100%;border-right:none;border-bottom:1px solid var(--glass-border);max-height:none}
+  .signal-list{overflow-y:visible;padding:14px 22px 24px}
+  .workspace{overflow:visible;min-height:500px}
+  .output-grid{grid-template-columns:1fr;padding:24px 22px;gap:16px}
+  .substrate-strip,.gov-strip{margin-left:22px;margin-right:22px}
+  .theory-banner{padding:14px 22px}
+  .topbar{padding:18px 22px;flex-direction:column;align-items:flex-start;gap:14px}
+  .topbar h1{font-size:15px;line-height:1.4}
+  .topbar-actions{width:100%;justify-content:flex-start}
+  .action-banner{padding:20px 22px;flex-direction:column;align-items:flex-start}
+  .output-actions{flex-direction:column;align-items:flex-start;gap:12px}
+}
+</style>
+</head>
+<body>
+<div class="ambient-glow-center"></div>
+
+<!-- ===== SIDEBAR : four AASOM agents ===== -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="wordmark">
+      <div class="logo">
+        <svg viewBox="0 0 304 182" width="46" height="28" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#ffffff" d="M86.4,66.4c0,3.7,0.4,6.7,1.1,8.9c0.8,2.2,1.8,4.6,3.2,7.2c0.5,0.8,0.7,1.6,0.7,2.3c0,1-0.6,2-1.9,3l-6.3,4.2c-0.9,0.6-1.8,0.9-2.6,0.9c-1,0-2-0.5-3-1.4C76.2,90,75,88.4,74,86.8c-1-1.7-2-3.6-3.1-5.9c-7.8,9.2-17.6,13.8-29.4,13.8c-8.4,0-15.1-2.4-20-7.2c-4.9-4.8-7.4-11.2-7.4-19.2c0-8.5,3-15.4,9.1-20.6c6.1-5.2,14.2-7.8,24.5-7.8c3.4,0,6.9,0.3,10.6,0.8c3.7,0.5,7.5,1.3,11.5,2.2v-7.3c0-7.6-1.6-12.9-4.7-16c-3.2-3.1-8.6-4.6-16.3-4.6c-3.5,0-7.1,0.4-10.8,1.3c-3.7,0.9-7.3,2-10.8,3.4c-1.6,0.7-2.8,1.1-3.5,1.3c-0.7,0.2-1.2,0.3-1.6,0.3c-1.4,0-2.1-1-2.1-3.1v-4.9c0-1.6,0.2-2.8,0.7-3.5c0.5-0.7,1.4-1.4,2.8-2.1c3.5-1.8,7.7-3.3,12.6-4.5c4.9-1.3,10.1-1.9,15.6-1.9c11.9,0,20.6,2.7,26.2,8.1c5.5,5.4,8.3,13.6,8.3,24.6V66.4z M45.8,81.6c3.3,0,6.7-0.6,10.3-1.8c3.6-1.2,6.8-3.4,9.5-6.4c1.6-1.9,2.8-4,3.4-6.4c0.6-2.4,1-5.3,1-8.7v-4.2c-2.9-0.7-6-1.3-9.2-1.7c-3.2-0.4-6.3-0.6-9.4-0.6c-6.7,0-11.6,1.3-14.9,4c-3.3,2.7-4.9,6.5-4.9,11.5c0,4.7,1.2,8.2,3.7,10.6C37.7,80.4,41.2,81.6,45.8,81.6z M126.1,92.4c-1.8,0-3-0.3-3.8-1c-0.8-0.6-1.5-2-2.1-3.9L96.7,10.2c-0.6-2-0.9-3.3-0.9-4c0-1.6,0.8-2.5,2.4-2.5h9.8c1.9,0,3.2,0.3,3.9,1c0.8,0.6,1.4,2,2,3.9l16.8,66.2l15.6-66.2c0.5-2,1.1-3.3,1.9-3.9c0.8-0.6,2.2-1,4-1h8c1.9,0,3.2,0.3,4,1c0.8,0.6,1.5,2,1.9,3.9l15.8,67l17.3-67c0.6-2,1.3-3.3,2-3.9c0.8-0.6,2.1-1,3.9-1h9.3c1.6,0,2.5,0.8,2.5,2.5c0,0.5-0.1,1-0.2,1.6c-0.1,0.6-0.3,1.4-0.7,2.5l-24.1,77.3c-0.6,2-1.3,3.3-2.1,3.9c-0.8,0.6-2.1,1-3.8,1h-8.6c-1.9,0-3.2-0.3-4-1c-0.8-0.7-1.5-2-1.9-4L156,23l-15.4,64.4c-0.5,2-1.1,3.3-1.9,4c-0.8,0.7-2.2,1-4,1H126.1z M254.6,95.1c-5.2,0-10.4-0.6-15.4-1.8c-5-1.2-8.9-2.5-11.5-4c-1.6-0.9-2.7-1.9-3.1-2.8c-0.4-0.9-0.6-1.9-0.6-2.8v-5.1c0-2.1,0.8-3.1,2.3-3.1c0.6,0,1.2,0.1,1.8,0.3c0.6,0.2,1.5,0.6,2.5,1c3.4,1.5,7.1,2.7,11,3.5c4,0.8,7.9,1.2,11.9,1.2c6.3,0,11.2-1.1,14.6-3.3c3.4-2.2,5.2-5.4,5.2-9.5c0-2.8-0.9-5.1-2.7-7c-1.8-1.9-5.2-3.6-10.1-5.2L246,52c-7.3-2.3-12.7-5.7-16-10.2c-3.3-4.4-5-9.3-5-14.5c0-4.2,0.9-7.9,2.7-11.1c1.8-3.2,4.2-6,7.2-8.2c3-2.3,6.4-4,10.4-5.2c4-1.2,8.2-1.7,12.6-1.7c2.2,0,4.5,0.1,6.7,0.4c2.3,0.3,4.4,0.7,6.5,1.1c2,0.5,3.9,1,5.7,1.6c1.8,0.6,3.2,1.2,4.2,1.8c1.4,0.8,2.4,1.6,3,2.5c0.6,0.8,0.9,1.9,0.9,3.3v4.7c0,2.1-0.8,3.2-2.3,3.2c-0.8,0-2.1-0.4-3.8-1.2c-5.7-2.6-12.1-3.9-19.2-3.9c-5.7,0-10.2,0.9-13.3,2.8c-3.1,1.9-4.7,4.8-4.7,8.9c0,2.8,1,5.2,3,7.1c2,1.9,5.7,3.8,11,5.5l14.2,4.5c7.2,2.3,12.4,5.5,15.5,9.6c3.1,4.1,4.6,8.8,4.6,14c0,4.3-0.9,8.2-2.6,11.6c-1.8,3.4-4.2,6.4-7.3,8.8c-3.1,2.5-6.8,4.3-11.1,5.6C264.4,94.4,259.7,95.1,254.6,95.1z"/>
+          <path fill="var(--aws-orange)" d="M273.5,143.7c-32.9,24.3-80.7,37.2-121.8,37.2c-57.6,0-109.5-21.3-148.7-56.7c-3.1-2.8-0.3-6.6,3.4-4.4c42.4,24.6,94.7,39.5,148.8,39.5c36.5,0,76.6-7.6,113.5-23.2C274.2,133.6,278.9,139.7,273.5,143.7z"/>
+          <path fill="var(--aws-orange)" d="M287.2,128.1c-4.2-5.4-27.8-2.6-38.5-1.3c-3.2,0.4-3.7-2.4-0.8-4.5c18.8-13.2,49.7-9.4,53.3-5c3.6,4.5-1,35.4-18.6,50.2c-2.7,2.3-5.3,1.1-4.1-1.9C282.5,155.7,291.4,133.4,287.2,128.1z"/>
+        </svg>
+      </div>
+      <h2>AASOM Co-Innovation Assistant</h2>
+    </div>
+    <span class="tag"><i class="fa-solid fa-sparkles"></i> MVP PROTOTYPE</span>
+    <div class="gov-chip"><i class="fa-solid fa-shield-halved"></i> Shadow Board governance</div>
+  </div>
+
+  <div class="sidebar-section">Agent Stack</div>
+  <div class="nav-menu" id="agent-nav">
+    <div class="nav-item active" data-agent="aia">
+      <i class="fa-solid fa-satellite-dish icon"></i>
+      <div class="agent-box">
+        <span class="agent-num">AGENT 01</span>
+        <span class="agent-name">Account Intelligence</span>
+        <span class="agent-desc">Weak-signal sensing across the whitespace</span>
+      </div>
+    </div>
+    <div class="nav-item" data-agent="pursuit">
+      <i class="fa-solid fa-bullseye icon"></i>
+      <div class="agent-box">
+        <span class="agent-num">AGENT 02</span>
+        <span class="agent-name">Pursuit</span>
+        <span class="agent-desc">Mobilising Specialists &amp; Partners</span>
+      </div>
+    </div>
+    <div class="nav-item" data-agent="know">
+      <i class="fa-solid fa-book-open icon"></i>
+      <div class="agent-box">
+        <span class="agent-num">AGENT 03</span>
+        <span class="agent-name">Knowledge &amp; Enablement</span>
+        <span class="agent-desc">Reusable plays from every win</span>
+      </div>
+    </div>
+    <div class="nav-item" data-agent="assure">
+      <i class="fa-solid fa-shield-halved icon"></i>
+      <div class="agent-box">
+        <span class="agent-num">AGENT 04</span>
+        <span class="agent-name">Assurance &amp; Responsible-AI</span>
+        <span class="agent-desc">Guardrails, provenance, kill criteria</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="meta">
+      <b>Data substrate</b>
+      Interaction data · Meeting notes · Proposal artefacts · Post-deal debriefs
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="greeting">Good morning, James</div>
+      <h1 id="main-title">Account Intelligence Agent · Explore Customer Signals</h1>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="icon-btn"><i class="fa-regular fa-bell"></i></div>
+      <div class="profile-pic">JW</div>
+    </div>
+  </div>
+
+  <!-- Theory banner -->
+  <div class="theory-banner">
+    <h4>Dynamic Capabilities (Teece, 2018) × Brown (2019) "assisted cognition at scale"</h4>
+    <p id="theory-banner-text">This prototype operationalises the sensing&nbsp;&#x2192;&nbsp;seizing&nbsp;&#x2192;&nbsp;transforming pathway inside a four-agent Agentic-AI Sales Operating Model. It turns interaction data into structured co-innovation sprint briefs that address the Rewards &amp; Incentives gap (M&nbsp;=&nbsp;2.39) from the primary research in Appendix A, while the Shadow Board governance shell ensures every agent output is draft-for-human, provenance-logged and subject to explicit kill criteria.</p>
+    <div class="dc-pills">
+      <span class="dc-pill sensing" id="pill-sensing"><i class="fa-solid fa-magnifying-glass"></i> Sensing</span>
+      <span class="dc-pill seizing" id="pill-seizing"><i class="fa-solid fa-bullseye"></i> Seizing</span>
+      <span class="dc-pill transforming" id="pill-transforming"><i class="fa-solid fa-bolt"></i> Transforming</span>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <!-- Left pane: inbox -->
+    <div class="signals-pane">
+      <div class="pane-header">
+        <h3>Inbox flow</h3>
+        <span class="count" id="inbox-count">3 signals</span>
+      </div>
+
+      <div class="custom-signal-box">
+        <textarea id="signal-input" placeholder="Paste a meeting note, a support ticket, a Partner email — or click the mic to dictate..."></textarea>
+        <div class="signal-actions">
+          <div class="mic-btn-container">
+            <button id="btn-mic" class="mic-btn" onclick="toggleVoice()"><i class="fa-solid fa-microphone"></i></button>
+            <span id="mic-status" class="mic-status">Listening...</span>
+          </div>
+          <button id="btn-add-signal" class="add-btn" onclick="addCustomSignal()"><i class="fa-solid fa-wand-magic-sparkles"></i> Ingest signal</button>
+        </div>
+      </div>
+
+      <div class="signal-list" id="signal-list"></div>
+    </div>
+
+    <!-- Right pane: workspace -->
+    <div class="workspace" id="workspace">
+
+      <div class="empty-state" id="empty-state">
+        <div class="orb-container">
+          <div class="orb-ring"></div>
+          <div class="orb-ring"></div>
+          <div class="orb"></div>
+        </div>
+        <h3>The AASOM agents are idle</h3>
+        <p>Select a signal from the inbox — or paste a new one — and the <b style="color:#fbbf24">Account Intelligence Agent</b> will route it through Pursuit, Knowledge &amp; Enablement and Assurance to generate a draft co-innovation sprint brief.</p>
+        <div class="hint">All outputs are draft-for-human · Shadow Board reviews executive-level sprints</div>
+      </div>
+
+      <div class="action-banner hidden" id="action-banner">
+        <div class="action-info">
+          <h2 id="ab-title">Signal scoped</h2>
+          <p id="ab-desc">Account Intelligence Agent has correlated this signal with prior substrate. Pursuit Agent is ready to draft the sprint brief.</p>
+        </div>
+        <button class="btn-generate" onclick="generateBrief()">
+          Generate Sprint Brief <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+      <div class="ai-processing hidden" id="processing-state">
+        <div class="orb-container" style="margin-bottom:0;transform:scale(0.6)">
+          <div class="orb-ring"></div>
+          <div class="orb"></div>
+        </div>
+        <span class="processing-text" id="processing-text">Routing signal through the agent stack...</span>
+        <div class="processing-trace" id="processing-trace"></div>
+      </div>
+
+      <div id="output-container" class="hidden">
+        <div class="output-grid" id="output-state">
+          <div class="output-actions">
+            <h2>Sprint Brief Workspace</h2>
+            <div class="route" id="route-trail">ROUTE: <b>AIA</b> → <b>PURSUIT</b> → <b>KNOWLEDGE</b> → <b>ASSURANCE</b></div>
+            <button class="add-btn" onclick="exportCopilot()"><i class="fa-regular fa-copy"></i> Export Markdown</button>
+          </div>
+
+          <div class="widget full" style="animation-delay:0.1s">
+            <div class="widget-title"><i class="fa-solid fa-chart-line"></i> Sprint Targets <span class="owner">owner: Pursuit Agent</span></div>
+            <div class="kpi-row" id="kpi-container"></div>
+          </div>
+
+          <div class="widget" style="animation-delay:0.2s">
+            <div class="widget-title"><i class="fa-solid fa-bullseye"></i> Objective &amp; Workstreams <span class="owner">owner: Pursuit Agent</span></div>
+            <p class="objective-text" id="sprint-objective"></p>
+            <ul class="workstream-list" id="workstream-list"></ul>
+          </div>
+
+          <div class="widget" style="animation-delay:0.3s">
+            <div class="widget-title"><i class="fa-solid fa-users-viewfinder"></i> Squad &amp; Risk <span class="owner">owner: Assurance Agent</span></div>
+            <div class="team-chips" id="team-chips"></div>
+            <div class="widget-title" style="margin-top:4px"><i class="fa-solid fa-shield-halved"></i> Risk matrix (click to expand)</div>
+            <div id="risk-list"></div>
+            <div class="assurance-panel">
+              <div class="title"><i class="fa-solid fa-check-double"></i> Assurance kill criteria</div>
+              <ul id="kill-criteria"></ul>
+            </div>
+          </div>
+
+          <div class="widget full theory-annotation" id="theory-annotation" style="animation-delay:0.45s"></div>
+
+          <div class="copilot-chat widget full" style="animation-delay:0.55s">
+            <div class="widget-title"><i class="fa-solid fa-comments"></i> Refine with Pursuit Agent <span class="owner">all edits re-enter Assurance review</span></div>
+            <div class="chat-chips">
+              <span class="c-chip" onclick="refineSprint('Compress duration by 1 week')">Compress duration</span>
+              <span class="c-chip" onclick="refineSprint('Add a compliance checkpoint to workstreams')">Add compliance step</span>
+              <span class="c-chip" onclick="refineSprint('Reduce partner scope')">Reduce partner scope</span>
+              <span class="c-chip" onclick="refineSprint('Pull a similar play from Knowledge library')">Pull similar play</span>
+              <span class="c-chip" onclick="refineSprint('Tighten assurance guardrails')">Tighten assurance</span>
+            </div>
+            <div class="chat-input-box">
+              <input type="text" id="copilot-cmd" placeholder="Ask the Pursuit Agent to iterate and refine this sprint...">
+              <button onclick="refineSprint()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="substrate-strip" id="substrate-strip">
+          <div class="cap">Shared data substrate · agents read from here</div>
+          <div class="cells">
+            <div class="cell">Interaction data</div>
+            <div class="cell">Meeting notes</div>
+            <div class="cell">Proposal artefacts</div>
+            <div class="cell">Post-deal debriefs</div>
+          </div>
+        </div>
+
+        <div class="gov-strip">
+          <b><i class="fa-solid fa-shield-halved"></i> Shadow Board governance</b>
+          <span class="status"><span class="dot"></span> Provenance logged · Kill criteria attached · Assurance review scheduled · CIO → CEO escalation path armed</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="academic-footer">
+    <strong>BEMM116DA Assessment 2 — Appendix B · AASOM Co-Innovation Assistant MVP</strong> &nbsp;|&nbsp; University of Exeter Business School &nbsp;|&nbsp; 2026<br>
+    Prototype artefact. Demonstrates feasibility of the four-agent Agentic-AI Sales Operating Model described in §3 of the proposal. In production the assistant would integrate with AWS CRM, partner registries and internal knowledge bases under Shadow Board governance.
+  </div>
+</div>
+
+<script>
+// ===== Agent copy — drives sidebar + theory banner + main title =====
+const AGENTS = {
+  aia:{
+    title:"Account Intelligence Agent · Explore Customer Signals",
+    banner:"This view belongs to the <b>Account Intelligence Agent</b> — the weak-signal harvester. It reads across interaction data, meeting notes and post-deal debriefs from the shared substrate to surface triggers the named account team has not yet prioritised. It <em>flags, not decides</em>. Every signal is routed downstream to Pursuit for qualification, then to Assurance before any human-facing artefact is generated.",
+    emptyHint:"Signals from the substrate are routed here. Pick one to send it through the stack."
+  },
+  pursuit:{
+    title:"Pursuit Agent · Mobilise &amp; Draft",
+    banner:"This view belongs to the <b>Pursuit Agent</b> — the mobiliser. It qualifies signals against pipeline reality (sponsor, budget authority, decision window), drafts the co-innovation sprint brief, auto-identifies the Specialists and Partners needed, and pre-populates meeting agendas. The seller approves or rejects — <em>nothing is auto-sent</em>. This is the agent the §4.2 performance model targets for win-rate lift.",
+    emptyHint:"Select a signal to draft the sprint brief. The Pursuit Agent never auto-sends."
+  },
+  know:{
+    title:"Knowledge &amp; Enablement Agent · Reusable Plays",
+    banner:"This view belongs to the <b>Knowledge &amp; Enablement Agent</b> — Brown's (2019) <em>assisted cognition at scale</em> made concrete. After each sprint, it harvests proposal artefacts, post-deal debriefs and reference architectures, then publishes them to an internal play library keyed by industry, trigger type and Partner ecosystem. Specialist hours per sprint should decline over time as the library matures — which is what §4.2 needs to untie coverage from headcount.",
+    emptyHint:"Select a signal to see which prior plays the agent would recommend reusing."
+  },
+  assure:{
+    title:"Assurance &amp; Responsible-AI Agent · Guardrails &amp; Kill Criteria",
+    banner:"This view belongs to the <b>Assurance &amp; Responsible-AI Agent</b> — the guardrail. Every agent output is draft-for-human. This agent screens for customer-confidential leakage and regulated-sector flags, attaches explicit kill criteria to each sprint, and escalates anything routed to an executive sponsor to the Shadow Board. Auditability is what lets the Shadow Board expand scope in phase 2 rather than re-litigate trust from scratch each quarter.",
+    emptyHint:"Select a signal to see the assurance package attached to the sprint."
+  }
+};
+
+let currentAgent = "aia";
+
+// ===== Scenarios — aligned to draft.md Appendix B =====
+let scenarios = [
+  {
+    title:"Tier 1 UK retail bank — Basel 3.1 reporting pressure",
+    industry:"Financial Services",
+    time:"Just now",
+    customer:"UK retail bank, top 10 by assets",
+    opportunity:"Three unrelated support tickets mention Basel 3.1 reporting pressure by January 2027. AIA correlates this with a Specialist note from a QBR six weeks earlier and a Partner's updated risk-analytics reference architecture.",
+    signals:["Regulatory", "Weak signal", "AIA→Pursuit"],
+    ref:"AASOM-FS-2026-Q2-014",
+    sprint:{
+      duration:"6-week sprint",
+      objective:"Prove a reusable Basel 3.1 reporting pattern on the customer's existing AWS data lake, co-built with a co-selling risk-analytics Partner and anchored to a named Group CRO delegate as sponsor.",
+      team:["Account Manager","AWS Specialist (FS)","Solutions Architect","Partner: risk-analytics ISV","Customer: Group CRO delegate"],
+      workstreams:[
+        "Sponsor confirmation + scope workshop (week 1)",
+        "Reference architecture + Partner pipeline build (weeks 2–3)",
+        "Go/no-go review against kill criteria (week 3)",
+        "Dry-run against two historical reporting periods (weeks 4–5)",
+        "Board-ready artefact + contribution to Knowledge library (week 6)"
+      ]
+    },
+    kpis:[
+      {value:"6wk", label:"Duration"},
+      {value:"1",   label:"Reference architecture"},
+      {value:"8wk", label:"To play library"},
+      {value:"£1.4M",label:"Est. ARR"}
+    ],
+    risks:[
+      {name:"Data governance (PII + trading data)", level:85, class:"high",
+       mitigation:"Assurance Agent isolates training environment, enforces AWS KMS + Macie scanning on every artefact, and blocks export until DPIA sign-off. Customer DPO added to week-1 workshop."},
+      {name:"Regulatory ambiguity in Basel 3.1 interpretation", level:55, class:"med",
+       mitigation:"Scope limited to a single reporting template; interpretation questions routed to the customer's compliance function, not answered by the agent. Every draft artefact carries a 'compliance-pending' watermark until signed off."},
+      {name:"Partner roadmap drift", level:40, class:"med",
+       mitigation:"Pursuit Agent pins the Partner version at sprint start and escalates to Shadow Board if the Partner ships a breaking change mid-sprint."}
+    ],
+    killCriteria:[
+      "Sponsor not confirmed by end of week 1 → stop.",
+      "Data governance path unresolved by end of week 2 → stop.",
+      "Historical dry-run recall below 80% of customer's current pipeline → pivot, do not press on."
+    ],
+    dcStage:"sensing",
+    theoryNote:"<span class='theory-icon'>&#x1f4d6;</span><strong>Dynamic Capabilities &times; Rumelt's crux:</strong> This brief operationalises <em>sensing</em> (three unrelated tickets correlated with a six-week-old Specialist note — the kind of weak-signal harvest Day &amp; Schoemaker (2005) call peripheral vision), <em>seizing</em> (Specialists and a Partner mobilised in days, not quarters), and <em>transforming</em> (the account team shifts from quoting compute to orchestrating a co-innovation outcome). The &pound;1.4M ARR is not the point — the <b>reusable reporting pattern contributed back to the Knowledge &amp; Enablement Agent inside 8 weeks</b> is. That is what unties coverage from headcount in the &sect;4.2 performance model, which is the <em>crux</em> Rumelt (2022) asks us to name. It also closes the Rewards &amp; Incentives gap (M&nbsp;=&nbsp;2.39, Appendix A) by measuring reusable contribution, not just consumption revenue &mdash; resolving what Kerr (1975) called 'the folly of rewarding A, while hoping for B'."
+  },
+  {
+    title:"NHS Acute Trust — elective-care backlog modelling",
+    industry:"Healthcare",
+    time:"2h ago",
+    customer:"NHS Acute Trust (700+ beds, South England)",
+    opportunity:"The Trust's digital director mentions in a partner workshop transcript that elective-care backlog modelling is now a board-level KPI. Two unrelated Specialists flag the same phrase in the same week. AIA surfaces it to Pursuit.",
+    signals:["Latent need", "Partner cap", "Public sector"],
+    ref:"AASOM-HC-2026-Q2-031",
+    sprint:{
+      duration:"8-week sprint",
+      objective:"Deploy a predictive elective-care backlog model on the Trust's existing AWS data lake, sponsored by the Trust COO and validated against one clinical-outcome metric — not a feature list.",
+      team:["Account Manager","AWS Specialist (Public Sector)","Data & AI SA","Partner: healthcare analytics ISV","Customer: Trust COO + CCIO"],
+      workstreams:[
+        "Sponsor + clinical-outcome metric agreed (week 1)",
+        "Data audit + DSPT controls verified (weeks 2–3)",
+        "Predictive model training + Partner integration (weeks 3–5)",
+        "Parallel-run against existing scheduling process (weeks 5–7)",
+        "Clinical validation + board-ready readout (week 8)"
+      ]
+    },
+    kpis:[
+      {value:"8wk",  label:"Duration"},
+      {value:"1",    label:"Clinical metric"},
+      {value:"214",  label:"Target Trusts"},
+      {value:"High", label:"Social value"}
+    ],
+    risks:[
+      {name:"NHS data governance (DSPT)", level:72, class:"med",
+       mitigation:"Assurance Agent enforces DSPT controls on every pipeline stage, leveraging AWS KMS defaults. DPIA attached before any data movement. Clinical safety lead co-signs before week-5 parallel run."},
+      {name:"Clinical validation latency", level:60, class:"med",
+       mitigation:"Parallel simulation environments to compress validation cycles. Kill criterion: if clinical sign-off slips past week 7, stop the sprint and convert learnings into a Knowledge library entry."},
+      {name:"Scope creep from 'just one more cohort'", level:45, class:"med",
+       mitigation:"Pursuit Agent locks cohort definition at week 1. Additional cohorts become a <em>new</em> sprint, not an extension. This is the 'lean in Brown's sense' discipline from &sect;3."}
+    ],
+    killCriteria:[
+      "COO sponsorship not confirmed by end of week 1 → stop.",
+      "DSPT sign-off blocked at week 3 → stop.",
+      "Clinical-outcome metric not agreed by end of week 2 → stop (do not proceed on a feature list)."
+    ],
+    dcStage:"seizing",
+    theoryNote:"<span class='theory-icon'>&#x1f4d6;</span><strong>Shared value &times; ambidexterity:</strong> This sprint demonstrates Porter &amp; Kramer's (2011) shared value &mdash; commercial outcomes for AWS and the Partner, clinical outcomes for patients, financial outcomes for the Trust. It also illustrates O'Reilly &amp; Tushman's (2013) ambidextrous organisation: the Account Manager's <em>exploit</em> motion (selling existing compute) and the <em>explore</em> motion (co-innovating a clinical-outcome model) have to coexist without one cannibalising the other &mdash; which is exactly why Shadow Board governance matters here, not just at the executive layer. Clark's (2020) Challenger Safety is prerequisite: clinicians must feel safe to question model outputs, which is why the Assurance Agent treats the clinical safety lead's sign-off as a hard gate, not a formality."
+  },
+  {
+    title:"UK grocer — loss-prevention edge inference",
+    industry:"Retail",
+    time:"1d ago",
+    customer:"Top-5 UK grocery retailer (&pound;40B+ revenue)",
+    opportunity:"Loss-prevention lead drops a phrase in a meeting note: 'we're tired of post-hoc dashboards.' AIA correlates with a Partner's new edge-inference reference architecture shipped last month. A reusable play exists for adjacent retailers.",
+    signals:["Shadow intent", "Partner cap", "AIA→Knowledge"],
+    ref:"AASOM-RT-2026-Q2-047",
+    sprint:{
+      duration:"6-week sprint",
+      objective:"Prove edge-inference loss-prevention on a single pilot store with an auditable inference log — creating a reusable template for the Knowledge &amp; Enablement library, not a one-off.",
+      team:["Account Manager","AWS Specialist (Retail)","Edge/IoT Solutions Architect","Partner: computer-vision ISV","Customer: Director of Loss Prevention + a single host store"],
+      workstreams:[
+        "Host store agreement + pilot scope (week 1)",
+        "Edge inference build with Partner (weeks 2–4)",
+        "Week-2 checkpoint against kill criteria",
+        "Live pilot in one store with auditable inference log (weeks 4–5)",
+        "Measured uplift readout + Knowledge library contribution (week 6)"
+      ]
+    },
+    kpis:[
+      {value:"6wk", label:"Duration"},
+      {value:"1",   label:"Pilot store"},
+      {value:"1",   label:"Reusable template"},
+      {value:"85%", label:"Provenance coverage"}
+    ],
+    risks:[
+      {name:"No store willing to host pilot", level:65, class:"med",
+       mitigation:"Week-2 hard kill criterion. Pursuit Agent routes to two candidate stores in parallel and escalates to the customer's ops director if neither commits by week 2."},
+      {name:"Customer-data privacy at the edge", level:55, class:"med",
+       mitigation:"Assurance Agent enforces no-raw-frame retention. Inference logs capture metadata only; any flagged frame is surfaced to a human reviewer, never auto-actioned."},
+      {name:"Template genericisation too fast", level:30, class:"low",
+       mitigation:"Knowledge &amp; Enablement Agent marks the template as 'tentative' until a second store replicates the pattern. Assurance Agent blocks library promotion until that replication happens."}
+    ],
+    killCriteria:[
+      "No host store by end of week 2 → stop.",
+      "Privacy review blocks edge retention by week 3 → stop.",
+      "Measured uplift under 25% of Partner's reference claim → do not promote template to library."
+    ],
+    dcStage:"transforming",
+    theoryNote:"<span class='theory-icon'>&#x1f4d6;</span><strong>Brown's <em>assisted cognition at scale</em> &times; VRIO:</strong> This scenario is the Knowledge &amp; Enablement Agent in its purest form. One pilot store, one measured uplift, one reusable template &mdash; then the next seller facing a similar trigger queries the library in natural language and starts warmer. That is the mechanism Brown (2019) calls <em>assisted cognition at scale</em>, and it is what makes AASOM pass Barney's (1991) VRIO test: the play library is valuable, rare (because no competitor has AWS UK&amp;I's Specialist &times; Partner ecosystem feeding it), inimitable (path-dependent &mdash; you cannot buy it, you have to accumulate it), and organised (the Shadow Board governance shell is the 'O' in VRIO). The single hosted pilot is also Teece's (2007) <em>transforming</em> stage made literal: the Account Manager's role has visibly shifted from seller to ecosystem orchestrator."
+  }
+];
+
+// ===== UI wiring =====
+let selectedScenario = -1;
+
+function initInbox(){
+  const list = document.getElementById('signal-list');
+  list.innerHTML = '';
+  scenarios.forEach((sc, idx) => {
+    const tgs = sc.signals.map(s => {
+      const cls = s.includes('→') || s.startsWith('AIA') ? 'stag agent' : 'stag';
+      return `<span class="${cls}">${s}</span>`;
+    }).join('');
+    const selCls = selectedScenario === idx ? 'selected' : '';
+    list.innerHTML += `
+      <div class="scenario-card ${selCls}" onclick="selectScenario(${idx})">
+        <div class="card-content">
+          <div class="card-header">
+            <span class="industry">${sc.industry}</span>
+            <span class="time">${sc.time}</span>
+          </div>
+          <h4>${sc.title}</h4>
+          <p>${sc.opportunity}</p>
+          <div class="signals-tags">${tgs}</div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('inbox-count').textContent = scenarios.length + ' signal' + (scenarios.length===1?'':'s');
+}
+
+// ===== Agent switching =====
+document.querySelectorAll('#agent-nav .nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('#agent-nav .nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    currentAgent = el.dataset.agent;
+    const a = AGENTS[currentAgent];
+    document.getElementById('main-title').innerHTML = a.title;
+    document.getElementById('theory-banner-text').innerHTML = a.banner;
+    // Reset workspace to idle when switching agents
+    document.getElementById('empty-state').querySelector('p').innerHTML = a.banner;
+    document.getElementById('output-container').classList.add('hidden');
+    document.getElementById('action-banner').classList.add('hidden');
+    document.getElementById('processing-state').classList.add('hidden');
+    document.getElementById('empty-state').classList.remove('hidden');
+    document.querySelectorAll('.dc-pill').forEach(p => p.classList.remove('active'));
+    selectedScenario = -1;
+    initInbox();
+  });
+});
+
+// ===== Voice input =====
+let recognition, isRecording = false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)){
+    alert("Speech recognition not supported in this browser. Try Chrome.");
+    return;
+  }
+  const btn = document.getElementById('btn-mic');
+  const status = document.getElementById('mic-status');
+  const input = document.getElementById('signal-input');
+  if(isRecording){ recognition.stop(); return; }
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onstart = () => { isRecording = true; btn.classList.add('recording'); status.classList.add('recording'); };
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    for(let i = event.resultIndex; i < event.results.length; ++i){
+      if(event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+    }
+    if(finalTranscript) input.value += finalTranscript + ' ';
+  };
+  recognition.onend = () => { isRecording = false; btn.classList.remove('recording'); status.classList.remove('recording'); };
+  recognition.start();
+}
+
+// ===== Custom signal ingestion =====
+function addCustomSignal(){
+  const val = document.getElementById('signal-input').value.trim();
+  if(!val) return;
+  let ind = "Cross-Industry";
+  const lc = val.toLowerCase();
+  if(lc.includes('bank') || lc.includes('basel') || lc.includes('finance')) ind = "Financial Services";
+  if(lc.includes('nhs') || lc.includes('patient') || lc.includes('trust') || lc.includes('clinical')) ind = "Healthcare";
+  if(lc.includes('retail') || lc.includes('store') || lc.includes('grocer') || lc.includes('shrinkage')) ind = "Retail";
+
+  const newScen = {
+    title:"AIA ingest — " + val.split(/\s+/).slice(0,5).join(' ') + (val.split(/\s+/).length>5?"…":""),
+    industry:ind,
+    time:"Just ingested",
+    customer:"Custom input",
+    opportunity:val,
+    signals:["Custom signal","AIA→Pursuit","Needs substrate match"],
+    ref:"AASOM-CUST-" + Math.floor(Math.random()*900+100),
+    sprint:{
+      duration:"3-week sprint",
+      objective:"Rapid MVP exploration aligning the detected signal with available Specialist and Partner capability. Scope deliberately lean in Brown's (2019) sense.",
+      team:["Account Manager","Solutions Architect","Specialist (TBC)","Partner (TBC)"],
+      workstreams:[
+        "Working-backwards workshop (day 1)",
+        "Architecture discovery + Partner shortlist (week 1)",
+        "Build + feedback loop (week 2)",
+        "Readout + Knowledge library contribution (week 3)"
+      ]
+    },
+    kpis:[
+      {value:"3wk", label:"Duration"},
+      {value:"TBD", label:"Target metric"},
+      {value:"1",   label:"Reusable artefact"},
+      {value:"High",label:"Est. learning"}
+    ],
+    risks:[
+      {name:"Scoping ambiguity", level:75, class:"high",
+       mitigation:"Mandatory Day-1 Working Backwards workshop before any code. Kill criterion: no agreed sponsor by end of day 1 → stop."},
+      {name:"Substrate match unclear", level:45, class:"med",
+       mitigation:"Knowledge &amp; Enablement Agent cross-references the trigger against the library. If no adjacent play exists, flag as exploratory and downgrade ARR claim."}
+    ],
+    killCriteria:[
+      "No sponsor identified by end of day 1 → stop.",
+      "No Specialist or Partner bandwidth in week 1 → reschedule, do not press on.",
+      "Week-2 build does not yield a demonstrable artefact → stop and harvest learnings."
+    ],
+    dcStage:"sensing",
+    theoryNote:"<span class='theory-icon'>&#x1f4d6;</span><strong>Sensing in its most fundamental form:</strong> This custom ingest demonstrates the <em>sensing</em> capability Teece (2018) describes as 'analytical systems and individual capacities to learn and to sense, filter, shape, and calibrate opportunities.' The Account Intelligence Agent automates filtering and shaping; the human provides calibration. Every custom signal is routed through Assurance before any downstream action — no auto-send, no auto-commit, no exceptions."
+  };
+
+  scenarios.unshift(newScen);
+  document.getElementById('signal-input').value = '';
+  initInbox();
+  selectScenario(0);
+}
+
+// ===== Select scenario =====
+function selectScenario(idx){
+  selectedScenario = idx;
+  initInbox();
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('processing-state').classList.add('hidden');
+  document.getElementById('output-container').classList.add('hidden');
+  document.getElementById('action-banner').classList.remove('hidden');
+  document.querySelectorAll('.dc-pill').forEach(p => p.classList.remove('active'));
+  const s = scenarios[idx];
+  const agentName = AGENTS[currentAgent].title.split('·')[0].trim();
+  document.getElementById('ab-title').textContent = 'Signal scoped — ' + s.industry;
+  document.getElementById('ab-desc').innerHTML =
+    `<b>${agentName}</b> has correlated this signal with the substrate. Pursuit Agent is ready to draft the sprint brief. Assurance will attach kill criteria before handoff.`;
+}
+
+// ===== Generate =====
+function generateBrief(){
+  if(selectedScenario < 0) return;
+  document.getElementById('action-banner').classList.add('hidden');
+  document.getElementById('processing-state').classList.remove('hidden');
+  document.getElementById('processing-text').textContent = "Routing signal through the AASOM stack...";
+  const trace = document.getElementById('processing-trace');
+  trace.innerHTML = `
+    <span>[AIA]      correlating signal with 4 substrate sources…</span>
+    <span>[PURSUIT]  drafting sprint brief · identifying Specialists + Partner…</span>
+    <span>[KNOWLEDGE] checking play library for adjacent patterns…</span>
+    <span>[ASSURANCE] screening for PII · attaching kill criteria…</span>
+    <span class="done">[READY]    draft brief ready for human review.</span>`;
+  setTimeout(() => {
+    document.getElementById('processing-state').classList.add('hidden');
+    renderOutput(scenarios[selectedScenario]);
+    document.getElementById('output-container').classList.remove('hidden');
+    document.getElementById('substrate-strip').classList.add('active');
+  }, 3100);
+}
+
+function renderOutput(s){
+  document.getElementById('kpi-container').innerHTML = s.kpis.map(k =>
+    `<div class="kpi-item"><div class="kpi-val">${k.value}</div><div class="kpi-lbl">${k.label}</div></div>`
+  ).join('');
+  document.getElementById('sprint-objective').textContent = s.sprint.objective;
+  document.getElementById('workstream-list').innerHTML = s.sprint.workstreams.map((w,i) =>
+    `<li class="workstream-item"><div class="workstream-num">${i+1}</div><div>${w}</div></li>`
+  ).join('');
+  document.getElementById('team-chips').innerHTML = s.sprint.team.map(t =>
+    `<div class="team-chip"><i class="fa-solid fa-user"></i> ${t}</div>`
+  ).join('');
+  document.getElementById('risk-list').innerHTML = s.risks.map((r,idx) =>
+    `<div class="risk-item" onclick="toggleRisk(${idx})">
+       <div class="risk-header"><span>${r.name}</span><span>${r.level}%</span></div>
+       <div class="risk-track"><div class="risk-fill ${r.class}" style="width:${r.level}%"></div></div>
+       <div class="risk-mitigation" id="risk-mit-${idx}">
+         <strong><i class="fa-solid fa-shield-halved"></i> Assurance mitigation:</strong><br>${r.mitigation}
+       </div>
+     </div>`
+  ).join('');
+  document.getElementById('kill-criteria').innerHTML = s.killCriteria.map(k => `<li>${k}</li>`).join('');
+  const theoryEl = document.getElementById('theory-annotation');
+  theoryEl.innerHTML = s.theoryNote;
+  document.querySelectorAll('.dc-pill').forEach(p => p.classList.remove('active'));
+  if(s.dcStage){
+    const pill = document.getElementById('pill-' + s.dcStage);
+    if(pill) pill.classList.add('active');
+  }
+  document.getElementById('route-trail').innerHTML =
+    `ROUTE: <b>AIA</b> → <b>PURSUIT</b> → <b>KNOWLEDGE</b> → <b>ASSURANCE</b> &nbsp;·&nbsp; REF <b>${s.ref}</b>`;
+}
+
+function toggleRisk(idx){
+  document.getElementById('risk-mit-' + idx).classList.toggle('expanded');
+}
+
+// ===== Export =====
+function exportCopilot(){
+  if(selectedScenario < 0) return;
+  const s = scenarios[selectedScenario];
+  const md = `
+# Co-Innovation Sprint Brief — ${s.title}
+**Ref:** ${s.ref}
+**Route:** AIA → Pursuit → Knowledge & Enablement → Assurance
+
+## Objective
+${s.sprint.objective}
+
+## Sprint Targets
+${s.kpis.map(k => `- **${k.label}:** ${k.value}`).join('\n')}
+
+## Workstreams
+${s.sprint.workstreams.map((w,i) => `${i+1}. ${w}`).join('\n')}
+
+## Squad
+${s.sprint.team.join(', ')}
+
+## Risks & Assurance Mitigations
+${s.risks.map(r => `- **${r.name}** (${r.level}%) — ${r.mitigation.replace(/<[^>]*>/g,'')}`).join('\n')}
+
+## Assurance Kill Criteria
+${s.killCriteria.map(k => `- ${k}`).join('\n')}
+
+---
+*Generated by AASOM Co-Innovation Assistant · draft-for-human · Shadow Board governance applies.*
+`.trim();
+  navigator.clipboard.writeText(md).then(() => {
+    alert("Sprint brief copied to clipboard as Markdown.");
+  }).catch(() => { alert("Clipboard access denied. Check browser permissions."); });
+}
+
+// ===== Refine (Pursuit Agent iteration) =====
+function refineSprint(cmd){
+  const val = cmd || document.getElementById('copilot-cmd').value;
+  if(!val || selectedScenario < 0) return;
+  document.getElementById('copilot-cmd').value = '';
+  document.getElementById('output-container').classList.add('hidden');
+  document.getElementById('processing-state').classList.remove('hidden');
+  document.getElementById('processing-text').textContent = `Pursuit Agent iterating: "${val}"`;
+  document.getElementById('processing-trace').innerHTML = `
+    <span>[PURSUIT]  applying refinement: ${val}…</span>
+    <span>[KNOWLEDGE] rechecking library for new match…</span>
+    <span>[ASSURANCE] re-running provenance + kill criteria check…</span>
+    <span class="done">[READY]    revised brief ready for review.</span>`;
+  setTimeout(() => {
+    const s = scenarios[selectedScenario];
+    const lc = val.toLowerCase();
+    if(lc.includes('compress') || lc.includes('reduce duration')){
+      const durKpi = s.kpis.find(k => k.label.toLowerCase().includes('duration'));
+      if(durKpi){
+        const wk = parseInt(durKpi.value) || 6;
+        durKpi.value = Math.max(2, wk - 1) + 'wk';
+      }
+      s.sprint.workstreams = s.sprint.workstreams.slice(0, Math.max(3, s.sprint.workstreams.length - 1));
+    }
+    if(lc.includes('compliance') || lc.includes('security')){
+      s.sprint.workstreams.push("Added: compliance checkpoint before external readout");
+      s.kpis.push({value:"Gated", label:"Compliance"});
+    }
+    if(lc.includes('partner scope') || lc.includes('reduce partner')){
+      s.sprint.team = s.sprint.team.filter(t => !t.startsWith('Partner'));
+      s.sprint.team.push('Partner: scope reduced — single vendor');
+    }
+    if(lc.includes('similar play') || lc.includes('knowledge library')){
+      s.theoryNote += "<br><br><strong>Knowledge library match:</strong> One adjacent play found — a similar sprint in a European peer market, 2025-Q4. Pattern reused as starting architecture. This is the compounding Brown (2019) predicts as <em>assisted cognition at scale</em>.";
+    }
+    if(lc.includes('assurance') || lc.includes('tighten')){
+      s.risks.forEach(r => { if(r.level > 30) r.level = Math.max(20, r.level - 15); });
+      s.killCriteria.push("Added: any agent output missing provenance metadata → immediate block.");
+    }
+    document.getElementById('processing-state').classList.add('hidden');
+    renderOutput(s);
+    document.getElementById('output-container').classList.remove('hidden');
+  }, 2200);
+}
+
+// ===== Init =====
+initInbox();
+</script>
+</body>
+</html>
